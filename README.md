@@ -65,7 +65,7 @@ The server exposes the following endpoints:
 You can use the CLI to interact with the server. To install the CLI, run the following command:
 
 ```bash
-go install github.com/yourusername/sqlkv@latest
+go install github.com/rishavvajpayee/sqlkv@latest
 ```
 
 Once the CLI is installed, you can use the following commands:
@@ -77,3 +77,4 @@ Once the CLI is installed, you can use the following commands:
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.
 
+x
