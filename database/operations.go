@@ -3,6 +3,7 @@ package database
 import (
 	"sqlkv/config"
 	"strconv"
+	"time"
 )
 
 func DbGetKey(app *config.AppConfig, key string) (string, error) {
@@ -15,23 +16,38 @@ func DbGetKey(app *config.AppConfig, key string) (string, error) {
 	return value, nil
 }
 
-func DbSetKey(app *config.AppConfig, key string, value string) (string, error) {
+func DbSetKey(app *config.AppConfig, key string, value string, exp int64) (string, error) {
 	var exists bool
 	err := app.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM kv WHERE key = ?)", key).Scan(&exists)
 	if err != nil {
 		return "", err
 	}
+	currentTime := time.Now().UTC()
 	if exists {
-		_, err := app.DB.Exec("UPDATE kv SET value=? WHERE key=?", value, key)
+		query := "UPDATE kv SET value=?"
+		args := []interface{}{value, key}
+		if exp != 0 {
+			expTime := currentTime.Add(time.Duration(exp) * time.Second)
+			query += ", expires_in=?"
+			args = []interface{}{value, expTime, key}
+		}
+		_, err := app.DB.Exec(query+" WHERE key=?", args...)
 		if err != nil {
 			return "", err
 		}
 		return value, nil
 	}
+
+	var expTime time.Time
+	if exp != 0 {
+		expTime = currentTime.Add(time.Duration(exp) * time.Second)
+	}
+
 	row, err := app.DB.Exec(
-		"INSERT INTO kv (key, value) VALUES (? , ?)",
+		"INSERT INTO kv (key, value, expires_in) VALUES (? , ?, ?)",
 		key,
 		value,
+		expTime,
 	)
 	if err != nil {
 		return "", err

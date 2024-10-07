@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 	"sqlkv/config"
 	"sqlkv/database"
@@ -9,8 +10,25 @@ import (
 )
 
 type SetKeyRequest struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	ExpiresIn int64  `json:"expires_in,omitempty"`
+}
+
+func InitialSeedDatabase(db *sql.DB) error {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS kv (id INTEGER PRIMARY KEY, key TEXT NOT NULL, value TEXT, expires_in TIMESTAMP DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS history ( seeded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, seeded BOOLEAN DEFAULT FALSE );")
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("INSERT INTO history (seeded) VALUES (0)")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetKey(context echo.Context) error {
@@ -33,7 +51,7 @@ func SetKey(context echo.Context) error {
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request body"})
 	}
-	value, err := database.DbSetKey(app, request.Key, request.Value)
+	value, err := database.DbSetKey(app, request.Key, request.Value, request.ExpiresIn)
 	if err != nil {
 		return context.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to set key"})
 	}
