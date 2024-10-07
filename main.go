@@ -61,7 +61,6 @@ func main() {
 
 	// Routes
 	server.GET("/", serverHealthCheck)
-	server.GET("/seed", handlers.Seed)
 	server.GET("kv/get/:key", handlers.GetKey)
 	server.POST("kv/set", handlers.SetKey)
 
