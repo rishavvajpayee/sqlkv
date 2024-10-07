@@ -29,10 +29,10 @@ Create a new SQLite database file named `sqlkv.db` in the root directory of the 
 
 ### Configure the Server
 
-Create a `.env` file in the root directory of the project and add the following environment variables:
+When you first run the server, it will create a new SQLite database file named `sqlkv.db` in the root directory of the project
 
-- `SCHEMA_FILE_PATH`: The path to the SQL schema file. Default value is `./schema.sql`.
 
+You can also configure the server by creating a `.env` file in the root directory of the project.
 Example `.env` file:
 
 ```bash
@@ -56,7 +56,6 @@ The server will start listening on port 8000 by default.
 The server exposes the following endpoints:
 
 - `GET /`: Health check endpoint.
-- `GET /seed`: Seed the database with some initial data.
 - `GET /kv/get/{key}`: Get the value for a given key.
 - `POST /kv/set`: Set the value for a given key. Requires a `key` and `value` parameter in the request body as JSON. Returns the value of the key.
 
