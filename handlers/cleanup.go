@@ -19,10 +19,6 @@ func DbCleanUp(ctx context.Context, db *sql.DB) {
 				slog.Error("Failed to cleanup database", "error", err)
 				return
 			}
-			if err != nil {
-				slog.Error("Failed to retrieve affected rows", "error", err)
-				return
-			}
 			time.Sleep(1 * time.Second)
 		}
 	}
