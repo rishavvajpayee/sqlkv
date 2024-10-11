@@ -10,13 +10,13 @@ import (
 )
 
 type SetKeyRequest struct {
-	Key       string `json:"key"`
-	Value     string `json:"value"`
-	ExpiresIn int64  `json:"expires_in,omitempty"`
+	Key       string      `json:"key"`
+	Value     interface{} `json:"value"`
+	ExpiresIn int64       `json:"expires_in,omitempty"`
 }
 
 func InitialSeedDatabase(db *sql.DB) error {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS kv (id INTEGER PRIMARY KEY, key TEXT NOT NULL, value TEXT, expires_in TIMESTAMP DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS kv (id INTEGER PRIMARY KEY, key TEXT NOT NULL, value TEXT, value_type TEXT, expires_in TIMESTAMP DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
 	if err != nil {
 		return err
 	}
@@ -38,9 +38,9 @@ func GetKey(context echo.Context) error {
 	key := context.Param("key")
 	value, err := database.DbGetKey(app, key)
 	if err != nil {
-		return context.JSON(500, map[string]string{"message": "key not found"})
+		return context.JSON(http.StatusInternalServerError, map[string]string{"message": "key not found"})
 	}
-	return context.JSON(http.StatusOK, map[string]string{key: value})
+	return context.JSON(http.StatusOK, map[string]interface{}{key: value})
 }
 
 func SetKey(context echo.Context) error {
