@@ -15,10 +15,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func serverHealthCheck(context echo.Context) error {
-	return context.JSON(http.StatusOK, map[string]string{"status": "success"})
-}
-
 func main() {
 	// Load config
 	if err := config.LoadConfig(); err != nil {
@@ -60,7 +56,9 @@ func main() {
 	go handlers.DbCleanUp(ctx, db)
 
 	// Routes
-	server.GET("/", serverHealthCheck)
+	server.GET("/", func(ctx echo.Context) error {
+		return ctx.JSON(http.StatusOK, map[string]string{"status": "success"})
+	})
 	server.GET("kv/get/:key", handlers.GetKey)
 	server.POST("kv/set", handlers.SetKey)
 
