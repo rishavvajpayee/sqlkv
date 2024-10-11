@@ -39,40 +39,25 @@ func DbGetKey(app *config.AppConfig, key string) (interface{}, error) {
 
 func DbSetKey(app *config.AppConfig, key string, value interface{}, exp int64) (string, error) {
 	valueStr, valueType := convertValue(value)
-	var exists bool
-	err := app.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM kv WHERE key = ?)", key).Scan(&exists)
-	if err != nil {
-		return "", err
-	}
 	currentTime := time.Now().UTC()
 	var expTime *time.Time
-	if exists {
-		query := "UPDATE kv SET value=? value_type=?"
-		args := []interface{}{valueStr, valueType, key}
-		if exp != 0 {
-			t := currentTime.Add(time.Duration(exp) * time.Second)
-			expTime = &t
-			query += ", expires_in=?"
-			args = []interface{}{value, expTime, key}
-		}
-		_, err := app.DB.Exec(query+" WHERE key=?", args...)
-		if err != nil {
-			return "", err
-		}
-		return valueStr, nil
-	}
+
 	if exp != 0 {
 		t := currentTime.Add(time.Duration(exp) * time.Second)
 		expTime = &t
 	}
 
-	_, err = app.DB.Exec(
-		"INSERT INTO kv (key, value, value_type, expires_in) VALUES (?, ?, ?, ?)",
-		key,
-		valueStr,
-		valueType,
-		expTime,
-	)
+	// a single UPSERT operation instead of separate INSERT or UPDATE
+	query := `
+        INSERT INTO kv (key, value, value_type, expires_in)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(key) DO UPDATE SET
+        value = excluded.value,
+        value_type = excluded.value_type,
+        expires_in = excluded.expires_in
+    `
+
+	_, err := app.DB.Exec(query, key, valueStr, valueType, expTime)
 	if err != nil {
 		return "", err
 	}

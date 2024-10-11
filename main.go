@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
@@ -45,7 +46,7 @@ func main() {
 	})
 
 	// Seed database
-	if err := handlers.InitialSeedDatabase(db); err != nil {
+	if err := InitialSeedDatabase(db); err != nil {
 		slog.Error("Failed to seed database", "error", err)
 		os.Exit(1)
 	}
@@ -80,4 +81,53 @@ func main() {
 
 	slog.Info("Starting HTTP server", "address", ":8000")
 	server.Logger.Fatal(server.Start(":8000"))
+}
+
+func InitialSeedDatabase(db *sql.DB) error {
+	_, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS kv
+		(id INTEGER PRIMARY KEY,
+		key TEXT NOT NULL,
+		value TEXT,
+		value_type TEXT,
+		expires_in TIMESTAMP DEFAULT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+	`)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS
+		history (
+			seeded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			seeded BOOLEAN DEFAULT FALSE
+		);`)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(`
+		INSERT INTO history (seeded) VALUES (0)
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS
+		idx_kv_key ON kv(key);
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		CREATE INDEX IF NOT EXISTS
+		idx_kv_expires_in ON kv(expires_in);
+	`)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
