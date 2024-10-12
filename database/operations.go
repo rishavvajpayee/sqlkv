@@ -10,13 +10,15 @@ import (
 )
 
 func DbGetKey(app *config.AppConfig, key string) (interface{}, error) {
-	var value string
-	var valueType string
+	// initializing both as strings ( infering data types )
+	value, valueType := "", ""
+
 	row := app.DB.QueryRow("SELECT value, value_type FROM kv WHERE key = ?", key)
 	err := row.Scan(&value, &valueType)
 	if err != nil {
 		return "", err
 	}
+
 	switch valueType {
 	case "string":
 		return value, nil

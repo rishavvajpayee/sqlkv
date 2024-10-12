@@ -14,11 +14,18 @@ type SetKeyRequest struct {
 	ExpiresIn int64       `json:"expires_in,omitempty"`
 }
 
+func getAppConfig(context echo.Context) *config.AppConfig {
+	return context.Get("app").(*config.AppConfig)
+}
+
 func GetKey(context echo.Context) error {
-	var (
-		app = context.Get("app").(*config.AppConfig)
-	)
+	// Get app config
+	app := getAppConfig(context)
+
+	// Get key from path
 	key := context.Param("key")
+
+	// Get value from database
 	value, err := database.DbGetKey(app, key)
 	if err != nil {
 		return context.JSON(http.StatusNotFound, map[string]string{"message": "key not found"})
@@ -27,15 +34,17 @@ func GetKey(context echo.Context) error {
 }
 
 func SetKey(context echo.Context) error {
-	var app = context.Get("app").(*config.AppConfig)
+	// Get app config
+	app := getAppConfig(context)
+
+	// Bind request
 	request := new(SetKeyRequest)
 
-	err := context.Bind(request)
-	if err != nil {
+	if err := context.Bind(request); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request body"})
 	}
-	_, err = database.DbSetKey(app, request.Key, request.Value, request.ExpiresIn)
-	if err != nil {
+
+	if _, err := database.DbSetKey(app, request.Key, request.Value, request.ExpiresIn); err != nil {
 		return context.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to set key", "err": err.Error()})
 	}
 	return context.JSON(http.StatusOK, map[string]string{"message": "Ok"})

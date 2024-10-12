@@ -1,22 +1,26 @@
 # SQLKV - Key-Value Store with SQL Backend
 
-SQLKV is a key-value store implemented in Go, with an SQL backend (using SQLite). The store exposes an HTTP interface for interacting with the key-value pairs, and it's designed to be easily extensible for SDK or CLI interaction.
+SQLKV is a lightweight key-value store implemented in Go, utilizing SQLite as its backend. It provides a RESTful HTTP interface for easy interaction with key-value pairs and is designed for extensibility, making it suitable for SDK or CLI integration.
 
 ## Features
 
-- **RESTful API**: Store and retrieve key-value pairs over HTTP.
-- **SQLite Backend**: Stores key-value pairs in a SQLite database.
-- **Middleware**: Includes middleware for injecting the app configuration into Echo requests.
-- **Health Check**: Endpoint to check the health of the server.
+- **RESTful API**: Easily store and retrieve key-value pairs over HTTP.
+- **SQLite Backend**: Efficiently stores data in a SQLite database.
+- **Middleware Support**: Injects app configuration into Echo requests seamlessly.
+- **Health Check Endpoint**: Monitor server health with a dedicated endpoint.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Go**: You need to have Go installed (version 1.18 or later).
-- **SQLite**: SQLite is used as the database backend.
+Before you begin, ensure you have the following installed:
+
+- **Go**: Version 1.18 or later.
+- **SQLite**: Required for the database backend.
 
 ### Clone the Repository
+
+To get started, clone the repository and navigate into the project directory:
 
 ```bash
 git clone https://github.com/yourusername/sqlkv.git
@@ -25,15 +29,13 @@ cd sqlkv
 
 ### Configure the Database
 
-Create a new SQLite database file named `sqlkv.db` in the root directory of the project. Or you can run the server and call the seed endpoint to create the database.
+You can create a new SQLite database file named `sqlkv.db` in the root directory of the project. Alternatively, run the server and call the seed endpoint to automatically create the database.
 
 ### Configure the Server
 
-When you first run the server, it will create a new SQLite database file named `sqlkv.db` in the root directory of the project
+Upon the first run, the server will create a new SQLite database file named `sqlkv.db` in the root directory.
 
-
-You can also configure the server by creating a `.env` file in the root directory of the project.
-Example `.env` file:
+For additional configuration, create a `.env` file in the root directory with the following example:
 
 ```bash
 SCHEMA_FILE_PATH=./schema.sql
@@ -41,13 +43,13 @@ SCHEMA_FILE_PATH=./schema.sql
 
 ### Run the Server
 
-To run the server, use the following command:
+To start the server, execute the following command:
 
 ```bash
 go run main.go
 ```
 
-The server will start listening on port 8000 by default.
+The server will listen on port **8000** by default.
 
 ## Usage
 
@@ -55,25 +57,27 @@ The server will start listening on port 8000 by default.
 
 The server exposes the following endpoints:
 
-- `GET /`: Health check endpoint.
-- `GET /kv/get/{key}`: Get the value for a given key.
-- `POST /kv/set`: Set the value for a given key. Requires a `key` and `value` parameter in the request body as JSON. Returns the value of the key.
+- **Health Check**: `GET /` - Check the health of the server.
+- **Get Value**: `GET /kv/get/{key}` - Retrieve the value associated with a given key.
+- **Set Value**: `POST /kv/set` - Set the value for a given key. Requires a JSON body with `key` and `value` parameters.
 
-### CLI
+### Command-Line Interface (CLI)
 
-You can use the CLI to interact with the server. To install the CLI, run the following command:
+You can interact with the server using the CLI. To install the CLI, run:
 
 ```bash
 go install github.com/rishavvajpayee/sqlkv@latest
 ```
 
-Once the CLI is installed, you can use the following commands:
+Once installed, you can use the following commands:
 
-- `get [key]`: Get the value for a given key.
-- `set [key] [value]`: Set the value for a given key.
+- `get [key]`: Retrieve the value for the specified key.
+- `set [key] [value]`: Set the value for the specified key.
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.
+Contributions are welcome! If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.
 
-x
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
