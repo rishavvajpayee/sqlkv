@@ -1,4 +1,4 @@
-# SQLKV - Key-Value Store with SQL Backend
+# SqlKV - Key-Value Store with SQL Backend
 
 SQLKV is a lightweight key-value store implemented in Go, utilizing SQLite as its backend. It provides a RESTful HTTP interface for easy interaction with key-value pairs and is designed for extensibility, making it suitable for SDK or CLI integration.
 
@@ -6,7 +6,6 @@ SQLKV is a lightweight key-value store implemented in Go, utilizing SQLite as it
 
 - **RESTful API**: Easily store and retrieve key-value pairs over HTTP.
 - **SQLite Backend**: Efficiently stores data in a SQLite database.
-- **Middleware Support**: Injects app configuration into Echo requests seamlessly.
 - **Health Check Endpoint**: Monitor server health with a dedicated endpoint.
 
 ## Getting Started
