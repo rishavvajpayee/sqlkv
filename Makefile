@@ -10,7 +10,8 @@ all: build
 
 # Build the application
 build:
-	go build -o $(APP_NAME) main.go
+	CGO_ENABLED=1 go build -o sqlkv
+	codesign --options runtime --timestamp -s - ./sqlkv
 
 # Run the application
 run: build
