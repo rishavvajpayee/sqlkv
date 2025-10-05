@@ -41,22 +41,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	slogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	// Initialize server
 	server := echo.New()
 
-	// Attach app config
-	app := &config.AppConfig{
-		DB:     db,
-		Logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-	}
-
-	// Middleware to attach app config
-	server.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(context echo.Context) error {
-			context.Set("app", app)
-			return next(context)
-		}
-	})
+	// // Middleware to attach app config
+	// server.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	// 	return func(context echo.Context) error {
+	// 		context.Set("app", app)
+	// 		return next(context)
+	// 	}
+	// })
 
 	// Seed database
 	if err := InitialSeedDatabase(db); err != nil {
@@ -73,8 +69,8 @@ func main() {
 	server.GET("/", func(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, map[string]string{"status": "success"})
 	})
-	server.GET("kv/get/:key", handlers.GetKey)
-	server.POST("kv/set", handlers.SetKey)
+	server.GET("kv/get/:key", handlers.GetKey(db, slogger))
+	server.POST("kv/set", handlers.SetKey(db, slogger))
 
 	// Graceful shutdown handling
 	quit := make(chan os.Signal, 1)

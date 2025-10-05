@@ -1,19 +1,20 @@
 package database
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
-	"sqlkv/config"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func DbGetKey(app *config.AppConfig, key string) (interface{}, error) {
+func DbGetKey(slog *slog.Logger, db *sql.DB, key string) (interface{}, error) {
 	// initializing both as strings ( infering data types )
 	value, valueType := "", ""
-
-	row := app.DB.QueryRow("SELECT value, value_type FROM kv WHERE key = ?", key)
+	slog.Info("Running DB get Key func")
+	row := db.QueryRow("SELECT value, value_type FROM kv WHERE key = ?", key)
 	err := row.Scan(&value, &valueType)
 	if err != nil {
 		return "", err
@@ -39,16 +40,17 @@ func DbGetKey(app *config.AppConfig, key string) (interface{}, error) {
 	}
 }
 
-func DbSetKey(app *config.AppConfig, key string, value interface{}, exp int64) (string, error) {
+func DbSetKey(slog *slog.Logger, db *sql.DB, key string, value interface{}, exp int64) (string, error) {
 	valueStr, valueType := convertValue(value)
 	currentTime := time.Now().UTC()
 	var expTime *time.Time
+
+	slog.Info("Running DB set Key function")
 
 	if exp != 0 {
 		t := currentTime.Add(time.Duration(exp) * time.Second)
 		expTime = &t
 	}
-
 	// a single UPSERT operation instead of separate INSERT or UPDATE
 	query := `
         INSERT INTO kv (key, value, value_type, expires_in)
@@ -58,8 +60,7 @@ func DbSetKey(app *config.AppConfig, key string, value interface{}, exp int64) (
         value_type = excluded.value_type,
         expires_in = excluded.expires_in
     `
-
-	_, err := app.DB.Exec(query, key, valueStr, valueType, expTime)
+	_, err := db.Exec(query, key, valueStr, valueType, expTime)
 	if err != nil {
 		return "", err
 	}
